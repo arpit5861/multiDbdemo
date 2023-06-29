@@ -1,0 +1,50 @@
+version: '3'
+services:
+  mysql:
+    build:
+      context: ./mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: mysql_database
+
+  postgresql:
+    build:
+      context: ./postgresql
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: postgres_database
+
+  my-service:
+    build:
+      context: ./src/main/java/com/example
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
+      - postgresql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mysql_database
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.MySQL5Dialect
+
+  other-service:
+    build:
+      context: ./src/main/java/com/example
+    ports:
+      - 8081:8081
+    depends_on:
+      - mysql
+      - postgresql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/postgres_database
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.PostgreSQLDialect
